@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.5.0)
 
 project(simpleload)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# The Dolphin source uses POSIX features that are disabled if EXTENSIONS is off
-set(CMAKE_CXX_EXTENSIONS ON)
-
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 

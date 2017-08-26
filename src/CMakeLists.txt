@@ -10,9 +10,10 @@ endmacro()
 
 # Enable C++17, but fall back to C++14 if it isn't available.
 # CMAKE_CXX_STANDARD cannot be used here because we require C++14 or newer, not any standard.
-check_and_add_flag(CXX17 -std=c++17)
+# The Dolphin source uses POSIX features that are disabled if EXTENSIONS is off.
+check_and_add_flag(CXX17 -std=gnu++17)
 if(NOT FLAG_CXX_CXX17)
-  check_and_add_flag(CXX1Z -std=c++1z)
+  check_and_add_flag(CXX1Z -std=gnu++1z)
   if (NOT FLAG_CXX_CXX1Z)
     set(CMAKE_CXX_STANDARD 14)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
