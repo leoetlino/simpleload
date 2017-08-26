@@ -7,13 +7,16 @@
 #include <cstdint>
 #include <cstdio>
 
+#include <fat.h>
 #include <ogc/ios.h>
 #include <ogc/ipc.h>
 #include <ogc/system.h>
 
 #include "common/ESFormats.h"
+#include "common/File.h"
 #include "common/MemoryUtils.h"
 #include "loader/Apploader.h"
+#include "loader/executable_readers/ElfReader.h"
 
 namespace Boot
 {
@@ -89,7 +92,30 @@ static void OSReport(const char* format, ...)
   va_end(args);
 }
 
-GameEntryFunction InitApploader()
+static GameEntryFunction LoadBinaryFromSD(const std::array<u8, 6>& game_id_bytes)
+{
+  auto fail = [](const char* message) {
+    printf("LoadBinaryFromSD: %s\n", message);
+    return nullptr;
+  };
+
+  const std::string game_id{game_id_bytes.cbegin(), game_id_bytes.cend()};
+  printf("LoadBinaryFromSD: Looking for a binary for %s\n", game_id.c_str());
+
+  if (!fatInitDefault())
+    return fail("fatInitDefault failed");
+
+  ElfReader elf_reader{"/" + game_id + ".elf"};
+  if (!elf_reader.IsValid())
+    return fail("Not a valid ELF");
+
+  if (!elf_reader.LoadIntoMemory())
+    return fail("Failed to load ELF to memory");
+
+  return reinterpret_cast<GameEntryFunction>(elf_reader.GetEntryPoint());
+}
+
+GameEntryFunction InitApploader(bool load_custom_binary_from_sd)
 {
   auto fail = [](const char* message) {
     printf("InitApploader: %s\n", message);
@@ -136,7 +162,21 @@ GameEntryFunction InitApploader()
   }
 
   printf("Calling apploader final function (%p)\n", final_function);
-  return final_function();
+  const GameEntryFunction entry_point = final_function();
+
+  if (!load_custom_binary_from_sd)
+    return entry_point;
+
+  std::array<u8, 6> game_id;
+  if (DI::Read(game_id.data(), game_id.size(), 0) != 1)
+    return fail("Failed to read game ID");
+
+  const GameEntryFunction sd_entry_point = LoadBinaryFromSD(game_id);
+  if (!sd_entry_point)
+    return entry_point;
+
+  printf("Returning SD entry point\n");
+  return sd_entry_point;
 }
 
 static u32 Read_U32(uintptr_t address)
@@ -194,6 +234,7 @@ bool CleanupBeforeLaunch()
   if (DI::Shutdown() != IPC_OK)
     return fail("Failed to clean up DI");
 
+  fatUnmount("sd:/");
   SYS_ResetSystem(SYS_SHUTDOWN, 0, 0);
   return true;
 }

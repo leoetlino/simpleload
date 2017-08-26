@@ -38,7 +38,7 @@ public:
   u32 GetFlags() const { return (u32)(header->e_flags); }
   bool LoadIntoMemory() const override;
   // TODO: actually check for validity.
-  bool IsValid() const override { return true; }
+  bool IsValid() const override { return !m_bytes.empty(); }
   int GetNumSegments() const { return (int)(header->e_phnum); }
   int GetNumSections() const { return (int)(header->e_shnum); }
   const u8* GetPtr(int offset) const { return (u8*)base + offset; }

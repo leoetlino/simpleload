@@ -17,8 +17,13 @@ std::optional<DI::Partition> InitAndOpenPartition(bool reload_ios);
 
 // Adapted from TinyLoad (GPL, copyright 2008-2009  Hector Martin  <marcan@marcansoft.com>)
 // Initialises the apploader, loads everything except branching to the game's entry point.
+//
+// If load_custom_binary_from_sd is true, and /${6_char_game_id}.elf exists on the SD card,
+// in addition to the normal apploader initialisation, that file will be loaded to memory
+// and its entry point will be returned instead of the one supplied by the apploader.
+//
 // Returns the game entry function.
-GameEntryFunction InitApploader();
+GameEntryFunction InitApploader(bool load_custom_binary_from_sd = true);
 
 // Adapted from Dolphin (GPLv2+)
 // Writes various constants that are required by games to low MEM1.

@@ -31,6 +31,9 @@ ElfReader::~ElfReader() = default;
 
 void ElfReader::Initialize(u8* ptr)
 {
+  if (m_bytes.empty())
+    return;
+
   base = (char*)ptr;
   base32 = (u32*)ptr;
   header = (Elf32_Ehdr*)ptr;
