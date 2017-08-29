@@ -3,6 +3,7 @@
 
 #include "loader/Apploader.h"
 #include "loader/Boot.h"
+#include "loader/CodeHandler.h"
 #include "loader/DI.h"
 
 int main()
@@ -20,6 +21,9 @@ int main()
   Boot::GameEntryFunction game_entry = Boot::InitApploader();
   if (!game_entry)
     return 1;
+
+  // TODO[config]: Code handler is forced for now. A config option should probably be added later.
+  CodeHandler::LoadIntoMemory();
 
   printf("Poking constants...\n");
   Boot::PokeConstants(*game_partition);
