@@ -1,4 +1,5 @@
 add_definitions(-Wall -fno-exceptions -fno-strict-aliasing)
+SET(CMAKE_ASM_FLAGS "${CFLAGS} -x assembler-with-cpp")
 
 include(CheckCXXCompilerFlag)
 macro(check_and_add_flag var flag)

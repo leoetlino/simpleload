@@ -3,6 +3,7 @@ add_executable(main
   Boot.cpp
   CodeHandler.cpp
   DI.cpp
+  PatchHook.s
   executable_readers/Reader.cpp
   executable_readers/ElfReader.cpp
 )

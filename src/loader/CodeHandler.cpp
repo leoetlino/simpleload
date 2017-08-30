@@ -2,9 +2,14 @@
 
 #include <algorithm>
 #include <array>
+#include <cinttypes>
+#include <cstdio>
+#include <cstring>
 
 #include "common/CommonTypes.h"
 #include "common/MemoryUtils.h"
+
+extern "C" void PatchHook(uintptr_t address, size_t max_distance_to_blr);
 
 namespace CodeHandler
 {
@@ -292,5 +297,35 @@ void LoadIntoMemory()
 
   // TODO[config]: Forced pause on boot for now. A config option should probably be added.
   *(u32*)0x80002774 = 1;
+
+  printf("LoadIntoMemory: code handler loaded to %p\n", dest);
+}
+
+void InsertHooks()
+{
+  uintptr_t address = 0x80003F00;
+  uintptr_t game_end = 0x81330000;
+
+  // TODO: add more hook types?
+  while (address < game_end)
+  {
+    // mr        r3, r7
+    // addi      r4, r7, 0x34
+    // addi      r5, r7, 0x38
+    // addi      r6, r7, 0x4c
+    constexpr std::array<u32, 4> bytes_VISetNextFrameBuffer = {
+        {0x7CE33B78, 0x38870034, 0x38A70038, 0x38C7004C}};
+
+    if (std::memcmp(reinterpret_cast<void*>(address), bytes_VISetNextFrameBuffer.data(),
+                    sizeof(bytes_VISetNextFrameBuffer)) == 0)
+    {
+      PatchHook(address, 0x100);
+      printf("InsertHooks: Patched VISetNextFrameBuffer at %08" PRIxPTR "\n", address);
+      break;
+    }
+
+    address += 4;
+  }
+  printf("InsertHooks: search complete\n");
 }
 }  // namespace CodeHandler

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5.0)
 
-project(simpleload)
+project(simpleload CXX ASM)
 
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

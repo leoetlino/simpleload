@@ -24,6 +24,7 @@ int main()
 
   // TODO[config]: Code handler is forced for now. A config option should probably be added later.
   CodeHandler::LoadIntoMemory();
+  CodeHandler::InsertHooks();
 
   printf("Poking constants...\n");
   Boot::PokeConstants(*game_partition);
